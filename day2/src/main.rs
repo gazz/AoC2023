@@ -24,15 +24,32 @@ fn main() {
     let valid_game_score : usize = games.iter().map(|game| {
         for d in game.draws.iter() {
             if d.red > red || d.green > green || d.blue > blue {
-                println!("Game not possible {:?}", game);
+                // println!("Game not possible {:?}", game);
                 return 0;
             }
         }
-        println!("Game is possible {:?}", game);
+        // println!("Game is possible {:?}", game);
         game.index
     }).sum::<usize>();
 
     println!("Games possible score: {valid_game_score}");
+
+    // calculate the power of all games
+    let power_sum : usize = games.iter().map(|game| {
+        let mut max_red = 0;
+        let mut max_green = 0;
+        let mut max_blue = 0;
+        for d in game.draws.iter() {
+            max_red = if d.red > max_red { d.red } else { max_red };
+            max_green = if d.green > max_green { d.green } else { max_green };
+            max_blue = if d.blue > max_blue { d.blue } else { max_blue };
+        }
+        max_red * max_green * max_blue
+    }).sum::<usize>();
+
+    println!("Sum of game powers: {power_sum}");
+
+
 }
 
 
@@ -145,3 +162,4 @@ fn test_parse_game_stats() {
         .map(|g| parse_game_stats(g).unwrap()).collect();
     assert_eq!(games.len(), 5);
 }
+
