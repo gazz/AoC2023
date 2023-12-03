@@ -1,8 +1,39 @@
 use regex::Regex;
 use std::cmp;
+use std::env;
+use std::fs;
+use std::str::FromStr;
 
 fn main() {
-    println!("does nothing");
+    let args: Vec<String> = env::args().collect();
+    let file_path = &args[1];
+
+    let contents = fs::read_to_string(file_path)
+        .expect("Should have been able to read the file");
+
+    let mask = symbol_mask(&contents);
+
+    let re: Regex = Regex::new(r"\d+").unwrap();
+
+    let parts_sum = contents.lines()
+        .filter(|l| !l.is_empty())
+        .map(|l| l.trim())
+        .enumerate()
+        .map(|(y, line_str)| {
+            re.captures_iter(line_str)
+                .map(|c| -> usize {
+                    // check hit on mask with all the digit positions
+                    let part_match = c.get(0).unwrap();
+                    let mask_hit = part_match.range().into_iter()
+                        .map(|x| {
+                            mask[y][x]
+                        }).sum::<usize>();
+                    if mask_hit > 0 { usize::from_str(part_match.as_str()).unwrap() } else { 0 }
+                })
+            .sum::<usize>()
+        })
+        .sum::<usize>();
+    println!("Parts sum: {parts_sum}");
 }
 
 
@@ -24,7 +55,7 @@ fn symbol_mask(input:  &str) -> Vec<Vec<usize>> {
         )
         .collect();
 
-    println!("Matches per row: {:?}", row_matches);
+    // println!("Matches per row: {:?}", row_matches);
 
     let hit_score = |x: usize, y: usize| -> usize {
         let min_x = if x == 0 { 0 } else { x - 1 };
@@ -55,37 +86,6 @@ fn symbol_mask(input:  &str) -> Vec<Vec<usize>> {
         )
         .collect()
 }
-
-
-// #[test]
-// fn test_symbol_mask() {
-//     let input = r#"
-//         467..114..
-//         ...*......
-//         ..35..633.
-//         ......#...
-//         617*......
-//         .....+.58.
-//         ..592.....
-//         ......755.
-//         ...$.*....
-//         .664.598.."#;
-
-//     let output: Vec<Vec<usize>> = vec![
-//         vec![0, 0, 1, 1, 1, 0, 0, 0, 0, 0,],
-//         vec![0, 0, 1, 1, 1, 0, 0, 0, 0, 0,],
-//         vec![0, 0, 1, 1, 1, 1, 1, 1, 0, 0,],
-//         vec![0, 0, 0, 0, 0, 1, 1, 1, 0, 0,],
-//         vec![0, 0, 1, 1, 1, 1, 1, 1, 0, 0,],
-//         vec![0, 0, 0, 0, 0, 1, 1, 1, 0, 0,],
-//         vec![0, 0, 1, 1, 1, 1, 1, 1, 0, 0,],
-//         vec![0, 0, 0, 0, 0, 1, 1, 1, 0, 0,],
-//         vec![0, 0, 1, 1, 1, 1, 1, 1, 0, 0,],
-//         vec![0, 0, 0, 0, 0, 1, 1, 1, 0, 0,],
-//     ];
-//     assert_eq!(symbol_mask(input), output);
-// }
-
 
 #[test]
 fn test_symbol_mask_small() {
