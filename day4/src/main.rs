@@ -21,7 +21,6 @@ fn part1(contents: &str) {
         .map(|l| l.trim())
         .map(|l| parse_card(l))
         .map(|(set1, set2)| 
-            // set1.intersection(&set2).copied().collect().len()
             set1.intersection(&set2).copied().collect::<HashSet<usize>>().len()
         )
         .map(|num_winners|
@@ -42,13 +41,9 @@ fn part2(contents: &str) {
         .map(|l| l.trim())
         .map(|l| parse_card(l))
         .map(|(set1, set2)| 
-            // set1.intersection(&set2).copied().collect().len()
             set1.intersection(&set2).copied().collect::<HashSet<usize>>().len()
         )
         .enumerate()
-        // .for_each(|(index, card_score)| {
-        //     winning_cards[index] += card_score;
-        // })
         .for_each(|(index, card_score)| {
             let count_of_cards = num_cards[index];
             for j in (index + 1)..(index + 1 + card_score) {
