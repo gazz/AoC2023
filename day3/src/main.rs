@@ -49,7 +49,7 @@ fn part_two(contents: &str) {
     // iterate over numbers but save the star location this time
 
     let re: Regex = Regex::new(r"\d+").unwrap();
-    let star_mask = symbol_mask(&contents, r"\*");
+    let star_mask = symbol_mask(&contents, STAR_MASK_RE);
     let star_hits: Vec<(usize, Vec<(usize, usize)>)> = contents.lines()
         .filter(|l| !l.is_empty())
         .map(|l| l.trim())
@@ -67,14 +67,14 @@ fn part_two(contents: &str) {
         .flatten()
         .filter(|(part_score, _)| *part_score > 0)
         .collect();
-    println!("Star hits: {:?}", star_hits);
+    // println!("Star hits: {:?}", star_hits);
 
     // group by star points
     let ratios_sum : usize = star_hits.iter()
         .sorted_by_key(|(_, b)| b)
         .group_by(|(_, b)| b)
         .into_iter()
-        .map(|(k, group)| {
+        .map(|(_, group)| {
             let part_numbers: Vec<(usize, &Vec<(usize, usize)>)> = group.map(|(part_num, g)| {
                 // part_num.clone()
                 (part_num.clone(), g)
@@ -228,7 +228,7 @@ fn find_nearby_symbol_locations(mask: &Vec<Vec<usize>>, row: usize, range: &Rang
         )
         .collect();
 
-    println!("Symbol locations for range: {:?} on row {row} are: {:?}", range, symbol_locations);
+    // println!("Symbol locations for range: {:?} on row {row} are: {:?}", range, symbol_locations);
 
     symbol_locations
 }
