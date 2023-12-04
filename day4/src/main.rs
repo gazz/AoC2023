@@ -12,6 +12,7 @@ fn main() {
         .expect("Should have been able to read the file");
 
     part1(&contents);
+    part2(&contents);
 }
 
 fn part1(contents: &str) {
@@ -29,7 +30,37 @@ fn part1(contents: &str) {
         .sum();
     // check the set intersect
     println!("Cards: {:?}", winning_score);
-}    
+}
+
+fn part2(contents: &str) {
+    let lines : Vec<&str> = contents.lines().collect();
+    let total_cards = lines.len();
+    let mut num_cards: Vec<usize> = vec![1; total_cards];
+
+    contents.lines()
+        .filter(|l| !l.is_empty())
+        .map(|l| l.trim())
+        .map(|l| parse_card(l))
+        .map(|(set1, set2)| 
+            // set1.intersection(&set2).copied().collect().len()
+            set1.intersection(&set2).copied().collect::<HashSet<usize>>().len()
+        )
+        .enumerate()
+        // .for_each(|(index, card_score)| {
+        //     winning_cards[index] += card_score;
+        // })
+        .for_each(|(index, card_score)| {
+            let count_of_cards = num_cards[index];
+            for j in (index + 1)..(index + 1 + card_score) {
+                if j < total_cards {
+                   num_cards[j] += count_of_cards;
+                }
+            }
+        });
+    // println!("Debug winning cards: {:?}", num_cards);
+    let end_total_cards : usize = num_cards.iter().sum();
+    println!("Total cards: {:?}", end_total_cards);
+}
 
 pub fn parse_card(line: &str) -> (HashSet<usize>, HashSet<usize>) {
     // Card 1: 41 48 83 86 17 | 83 86  6 31 17  9 48 53
