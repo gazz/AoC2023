@@ -11,14 +11,17 @@ fn main() {
     let contents = fs::read_to_string(file_path)
         .expect("Should have been able to read the file");
 
-    part1(&contents);
-    part2(&contents);
-}
-
-fn part1(contents: &str) {
-    let winning_score : usize = contents.lines()
+    let in_mem_lines: Vec<&str> = contents.lines()
         .filter(|l| !l.is_empty())
         .map(|l| l.trim())
+        .collect();
+
+    part1(&in_mem_lines);
+    part2(&in_mem_lines);
+}
+
+fn part1(lines: &Vec<&str>) {
+    let winning_score : usize = lines.iter()
         .map(|l| parse_card(l))
         .map(|(set1, set2)| 
             set1.intersection(&set2).copied().collect::<HashSet<usize>>().len()
@@ -31,15 +34,11 @@ fn part1(contents: &str) {
     println!("Cards: {:?}", winning_score);
 }
 
-fn part2(contents: &str) {
-    let lines : Vec<&str> = contents.lines().collect();
+fn part2(lines: &Vec<&str>) {
     let total_cards = lines.len();
     let mut num_cards: Vec<usize> = vec![1; total_cards];
 
-    contents.lines()
-        .filter(|l| !l.is_empty())
-        .map(|l| l.trim())
-        .map(|l| parse_card(l))
+    lines.iter().map(|l| parse_card(l))
         .map(|(set1, set2)| 
             set1.intersection(&set2).copied().collect::<HashSet<usize>>().len()
         )
@@ -57,7 +56,7 @@ fn part2(contents: &str) {
     println!("Total cards: {:?}", end_total_cards);
 }
 
-pub fn parse_card(line: &str) -> (HashSet<usize>, HashSet<usize>) {
+fn parse_card(line: &str) -> (HashSet<usize>, HashSet<usize>) {
     // Card 1: 41 48 83 86 17 | 83 86  6 31 17  9 48 53
     // discard everything up to 'Card xx: '
     let oi : Vec<HashSet<usize>> = line.split([':', '|'])
