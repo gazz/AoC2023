@@ -10,6 +10,7 @@ fn main() {
         .expect("Should have been able to read the file");
 
     part1(&contents);
+    part2(&contents);
 }
 
 fn part1(contents: &str) {
@@ -39,6 +40,20 @@ fn part1(contents: &str) {
     println!("part 1 score is {score}");
 }
 
+
+fn part2(contents: &str) {
+    let results = contents.lines()
+        .map(|s| s.split(":").skip(1).next().unwrap())
+        .map(|s| {
+            usize::from_str(s.trim().replace(" ", "").trim()).unwrap()
+        })
+        .collect::<Vec<usize>>();
+
+    println!("Results: {:?}", results);
+
+    let (start, end) = line_intersection(results[0], results[1]);
+    println!("part 2 score is {}", end - start + 1);
+}
 
 fn line_intersection(time: usize, record: usize) -> (usize, usize)  {
     // graph is y = x(7 - x) 
@@ -75,5 +90,7 @@ mod tests {
         assert_eq!(line_intersection(30, 200), (11, 19));
         assert_eq!(line_intersection(75, 1328), (29, 46));
         // assert_eq!(1, 0);
+
+        assert_eq!(line_intersection(71530, 940200), (14, 71516));
     }
 }
