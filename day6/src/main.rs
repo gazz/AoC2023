@@ -59,11 +59,11 @@ fn line_intersection(time: usize, record: usize) -> (usize, usize)  {
     // graph is y = x(7 - x) 
     // can be rewritten as -x^2 + 7x - 9 = 0 in form ax^2 + bx + c = 0
     // a = 1, b = time, c = record
-    // discriminant = (b ** 2) - (4 * c)
-    // solution 1: (-b - sqrt(discriminant) / 2
-    // solution 2: (-b + sqrt(discriminant) / 2
+    // discriminant = b^2 - 4c
+    // solution 1: (b - sqrt(discriminant) / 2
+    // solution 2: (b + sqrt(discriminant) / 2
 
-    let discriminant: i64 = time as i64 * time as i64 - 4 * record as i64;
+    let discriminant: usize = time * time - 4 * record;
     let dis_sqrt = (discriminant as f64).sqrt();
 
     // let sol1 = (time - dis_sqrt as i64) / 2;
@@ -72,7 +72,8 @@ fn line_intersection(time: usize, record: usize) -> (usize, usize)  {
     let sol2_f64 = (time as f64 + dis_sqrt) / 2.;
     let sol1 = sol1_f64.floor() as i64;
     let sol2 = sol2_f64.ceil() as i64;
-    println!("Input [{time}, {record}], i64 [{sol1}, {sol2}], f64 [{sol1_f64}, {sol2_f64}]");
+    // println!("Input [{time}, {record}], i64 [{sol1}, {sol2}], f64 [{sol1_f64}, {sol2_f64}]");
+    // return inclusive range to account for exact sqrt matches
     ((sol1 + 1) as usize, (sol2 - 1) as usize)
 }
 
