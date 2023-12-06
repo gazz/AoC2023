@@ -3,7 +3,6 @@ use std::env;
 use std::fs;
 use core::ops::Range;
 use std::iter;
-use std::cmp;
 
 
 fn main() {
@@ -13,14 +12,14 @@ fn main() {
     let contents = fs::read_to_string(file_path)
         .expect("Should have been able to read the file");
 
-    // part1(&contents);
+    part1(&contents);
     part2(&contents);
 
 }
 
 fn part1(contents: &str) {
     let sections : Vec<String> = parse_sections(contents);
-    println!("Sections: {:?}", sections);
+    // println!("Sections: {:?}", sections);
 
     let seeds: Vec<usize> = sections[0].split(":").skip(1)
         .map(|s| {
@@ -29,7 +28,7 @@ fn part1(contents: &str) {
                 .collect::<Vec<usize>>()
         }).next().unwrap();
 
-    println!("Seeds: {:?}", seeds);
+    // println!("Seeds: {:?}", seeds);
 
     let ranges = sections.iter().skip(1)
         .map(|section| {
@@ -39,7 +38,7 @@ fn part1(contents: &str) {
         })
         .collect::<Vec<Vec<(Range<usize>, usize)>>>();
 
-    println!("Ranges: {:?}", ranges);
+    // println!("Ranges: {:?}", ranges);
 
     let locations = seeds.iter().map(|seed| {
         let mut lookup_id = *seed;
@@ -90,7 +89,7 @@ fn part2(contents: &str) {
             .flatten()
             .collect::<Vec<Range<usize>>>();
         
-        println!("-- Step output: {:?}", step_output);
+        // println!("-- Step output: {:?}", step_output);
         step_ranges = step_output;
     }
 
@@ -98,7 +97,7 @@ fn part2(contents: &str) {
 
     println!("Closest location is {}", step_ranges[0].start);
 
- }
+}
 
 fn parse_ranges(input: &str) -> Vec<(Range<usize>, usize)> {
     // println!("Parsing ranges: {input}");
@@ -139,7 +138,7 @@ fn map_lookup_ranges(mapping: &Vec<(Range<usize>, usize)>, in_range: &Range<usiz
 
 
         if out_of_overlap {
-            println!("No overlap with ranges: {:?} and {:?}", map_range, test_range);
+            // println!("No overlap with ranges: {:?} and {:?}", map_range, test_range);
             return RangeOverlap {
                 leading: None,
                 matching: None,
@@ -147,7 +146,7 @@ fn map_lookup_ranges(mapping: &Vec<(Range<usize>, usize)>, in_range: &Range<usiz
             };
         }
 
-        println!("Building range overlap with ranges: {:?} and {:?}", map_range, test_range);
+        // println!("Building range overlap with ranges: {:?} and {:?}", map_range, test_range);
 
         let has_leading = test_range.start < map_range.0.start;
         let has_trailing = test_range.end > map_range.0.end;
@@ -178,7 +177,7 @@ fn map_lookup_ranges(mapping: &Vec<(Range<usize>, usize)>, in_range: &Range<usiz
             break; 
         }
         let overlap = range_overlap_fn(&mapping[i], &reminder_range);
-        println!("Overlap result: {:?}, test_range: {:?}", overlap, reminder_range);
+        // println!("Overlap result: {:?}, test_range: {:?}", overlap, reminder_range);
 
         if overlap.leading.is_some() { all_ranges.push(overlap.leading.unwrap()); }
         if overlap.matching.is_some() { all_ranges.push(overlap.matching.unwrap()); }
@@ -187,7 +186,7 @@ fn map_lookup_ranges(mapping: &Vec<(Range<usize>, usize)>, in_range: &Range<usiz
         i += 1;
     }
 
-    println!("Ranges: {:?}", all_ranges);
+    // println!("Ranges: {:?}", all_ranges);
 
     all_ranges.sort_by_key(|r| r.start);
     all_ranges
