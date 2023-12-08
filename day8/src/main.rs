@@ -10,23 +10,32 @@ fn main() {
     let contents = fs::read_to_string(file_path)
         .expect("Should have been able to read the file");
 
-    part_one(&contents);
-
-    // part_two(&contents);
+    // part1(&contents);
+    part2(&contents);
 }
 
-fn part_one(contents: &str) {
+fn part1(contents: &str) {
     // parse directions
-    let mut directions = contents.lines().next().unwrap().chars().cycle();
+    let directions = contents.lines().next().unwrap();
     let nodes = parse_graph(contents.lines().skip(2));
 
     // start node
-    let mut current_node = nodes.get("AAA").unwrap();
+    let start_node = nodes.get("AAA").unwrap();
+    let (distance, _) = find_distance(&nodes, start_node, directions);
+    println!("Part 1 took {distance} steps to reach destination ZZZ");
+}
+
+fn find_distance<'a>(nodes: &'a HashMap<&str, Node>, start_node: &'a Node, dir: &str) -> (usize, &'a str) {
+    let mut directions = dir.chars().cycle();
+    let mut current_node = start_node;
     let mut steps = 0usize;
-    while current_node.name != "ZZZ" {
+    let mut traverse_from_start = true;
+    while traverse_from_start
+        || !current_node.name.ends_with("Z") {
+        traverse_from_start = false;
         steps += 1;
         let next_move = directions.next().unwrap();
-        println!("Step {steps}: current node: {:?}, next move: {}", current_node, next_move);
+        // println!("Step {steps}: current node: {:?}, next move: {}", current_node, next_move);
 
         if next_move == 'L' {
             current_node = nodes.get(current_node.left).unwrap();
@@ -34,11 +43,64 @@ fn part_one(contents: &str) {
             current_node = nodes.get(current_node.right).unwrap();
         }
     }
-    println!("Took {steps} steps to reach destination ZZZ");
+    println!("Start Node: {}, End Node: {}, steps: {}", 
+        start_node.name, current_node.name, steps);
+    (steps, &current_node.name)
 }
 
+pub fn lcm(nums: &[usize]) -> usize {
+    if nums.len() == 1 {
+        return nums[0];
+    }
+    let a = nums[0];
+    let b = lcm(&nums[1..]);
+    a * b / gcd_of_two_numbers(a, b)
+}
 
-#[derive(Debug)]
+fn gcd_of_two_numbers(a: usize, b: usize) -> usize {
+    if b == 0 {
+        return a;
+    }
+    gcd_of_two_numbers(b, a % b)
+}
+
+fn part2(contents: &str) {
+    let directions = contents.lines().next().unwrap();
+    let nodes = parse_graph(contents.lines().skip(2));
+
+    let traverse_distances = nodes.iter()
+        .filter(|(k,v)| k.ends_with("A"))
+        .map(|(_, v)| {
+            find_distance(&nodes, v, directions)
+        })
+        .collect::<Vec<(usize, &str)>>();
+
+    let traverse_distances2 = traverse_distances.iter()
+        .map(|(_, v)| {
+            find_distance(&nodes, nodes.get(v).unwrap(), directions)
+        })
+        .collect::<Vec<(usize, &str)>>();
+
+    println!("Traverse disances1: {:?}", traverse_distances);
+    // loop each path again
+    println!("Traverse disances2: {:?}", traverse_distances2);
+
+    // looks like each path is stuck in the same loop and ends up on 
+    // the same node running the same distance every loop
+    // eg - "GPA" reaches "LLZ" in 21979 steps, "LLZ" loops to itself in another 21979 steps
+    // the result is a number that divides with each path distance
+    // -> Lowest Common Multiple
+
+    let distances = traverse_distances.iter()
+        .map(|(d, _)| d.clone()).collect::<Vec<usize>>();
+    let result: usize = lcm(&distances[0..]);
+
+    println!("Result: {:?}", result);
+    // println!("Part 2 took {steps} steps to reach all destinations ending with Z");
+
+}
+
+#[derive(Debug, PartialEq)]
 struct Node<'a > {
     name: &'a str,
     left: &'a str,
@@ -47,7 +109,7 @@ struct Node<'a > {
 
 fn parse_graph<'a>(lines: impl Iterator<Item = &'a str>) -> HashMap<&'a str, Node<'a>> {
     let mut nodes = HashMap::new();
-    let re: Regex = Regex::new(r"[A-Z]{3}").unwrap();
+    let re: Regex = Regex::new(r"[A-Z0-9]{3}").unwrap();
 
     lines.map(|s| {
             let captures = re.captures_iter(s
