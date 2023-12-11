@@ -1,3 +1,4 @@
+use std::path;
 use std::str::FromStr;
 use std::env;
 use std::fs;
@@ -9,7 +10,8 @@ fn main() {
     let contents = fs::read_to_string(file_path)
         .expect("Should have been able to read the file");
 
-    part1(&contents);
+    // part1(&contents);
+    part2(&contents);
 }
 
 
@@ -48,6 +50,74 @@ fn part1(contents: &str) {
 
     println!("Traverse distance: {:?}, furthest tile: {}", steps, steps / 2);
 }
+
+
+// Flood-fill (node):
+//   1. Set Q to the empty queue or stack.
+//   2. Add node to the end of Q.
+//   3. While Q is not empty:
+//   4.   Set n equal to the first element of Q.
+//   5.   Remove first element from Q.
+//   6.   If n is Inside:
+//          Set the n
+//          Add the node to the west of n to the end of Q.
+//          Add the node to the east of n to the end of Q.
+//          Add the node to the north of n to the end of Q.
+//          Add the node to the south of n to the end of Q.
+//   7. Continue looping until Q is exhausted.
+//   8. Return.
+fn part2(contents: &str) {
+    let mut path_nodes : Vec<(usize, usize)> = Vec::new();
+
+    let tile_grid: Vec<Vec<char>> = contents.lines()
+        .map(|l| l.chars().collect()).collect();
+
+    // find start position 
+    let mut start_index_ = None;
+    let row_len = tile_grid[0].len();
+    for i in 0..tile_grid.len() {
+        for j in 0..row_len {
+            if tile_grid[j][i] == 'S' {
+                println!("Found start index: {}; {}", 
+                    i, j);
+                start_index_ = Some((i, j));
+            }
+        }
+    }
+    let start_location = start_index_.unwrap();
+    println!("Start location: {:?}, start char: {}", start_location,
+        tile_grid[start_location.1][start_location.0]);
+
+    // lets do 10k iterations as limit
+    let mut prev_move = Move::None;
+    let mut next_location = start_location;
+    let mut steps = 0;
+    for i in 0..1000000 {
+        steps = i + 1;
+        (next_location, prev_move) = traverse(&tile_grid, 
+            &next_location, &prev_move);
+        path_nodes.push(next_location);
+        if next_location == start_location {
+            break;
+        }
+    }
+
+    println!("Path encompases {} nodes", path_nodes.len());
+
+    println!("Grid size {} nodes", tile_grid.len() * row_len);
+
+    // find first line that can't be part of the loop, eg - ./J/7/-
+    // try to find a point on the line that intersects with the loop 
+    // and from there on if traversed clockwise, right hand side is inside the loop.
+    // except if inside point is also part of the loop, then discard & continue traverse
+    // gather all points into groups of adjacent perimeter for inside loop
+
+    // perform fill on each perimeter to calculate tiles inside
+
+
+
+}
+
 
 #[derive(PartialEq, Debug)]
 enum Move {
